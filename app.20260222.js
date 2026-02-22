@@ -7,6 +7,8 @@ const loadingIndicator = document.getElementById("loading-indicator");
 const stageCaption = document.getElementById("stage-caption");
 const sections = [...document.querySelectorAll(".story-section")];
 const navLinks = [...document.querySelectorAll(".section-nav a")];
+const contactDropdown = document.getElementById("contact-dropdown");
+const contactActionToggle = document.getElementById("contact-action-toggle");
 
 const stageLabels = [
   "",
@@ -65,7 +67,7 @@ let isTweeningStage = false;
 let isUserInteracting = false;
 
 const particleState = {
-  count: 960,
+  count: 1680,
   points: null,
   positions: null,
   velocity: null,
@@ -87,6 +89,8 @@ const stageStates = [];
 const sectionHeadings = sections.map((section) => section.querySelector(".type-line"));
 const sectionIds = sections.map((section) => section.id || "");
 const sectionIdToIndex = new Map(sectionIds.map((id, index) => [id, index]));
+const CARD_REVEAL_DELAY_MS = 620;
+let cardRevealToken = 0;
 
 const pointer = { x: 0, y: 0 };
 const mouseCamOffset = new THREE.Vector3();
@@ -109,9 +113,9 @@ function seedParticle(i) {
   particleState.positions[base + 1] = randomRange(yMin, yMax);
   particleState.positions[base + 2] = randomRange(zMin, zMax);
 
-  particleState.velocity[base] = randomRange(-0.0038, 0.0038);
-  particleState.velocity[base + 1] = randomRange(0.0024, 0.0066);
-  particleState.velocity[base + 2] = randomRange(0.0014, 0.0042);
+  particleState.velocity[base] = randomRange(-0.0054, 0.0054);
+  particleState.velocity[base + 1] = randomRange(0.0034, 0.0084);
+  particleState.velocity[base + 2] = randomRange(0.0022, 0.0058);
 }
 
 function createParticleField() {
@@ -130,10 +134,10 @@ function createParticleField() {
 
   const material = new THREE.PointsMaterial({
     color: 0x57f4ff,
-    size: 0.028,
+    size: 0.036,
     sizeAttenuation: true,
     transparent: true,
-    opacity: 0.44,
+    opacity: 0.62,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   });
@@ -164,7 +168,7 @@ function updateParticleField(delta, elapsed) {
 
   const { positions, velocity, bounds } = particleState;
   const step = Math.min(delta * 60, 1.8);
-  const radius = modelRadius * 1.35;
+  const radius = modelRadius * 1.85;
   const radiusSq = radius * radius;
 
   const pointerX = THREE.MathUtils.clamp(pointer.x, -1, 1);
@@ -172,7 +176,7 @@ function updateParticleField(delta, elapsed) {
   const hoverX = pointerX * bounds.x * 0.84;
   const hoverY = THREE.MathUtils.lerp(bounds.yMin, bounds.yMax, (1 - pointerY) * 0.5);
 
-  const targetStrength = particleState.interaction.active ? 1.35 : 0;
+  const targetStrength = particleState.interaction.active ? (particleState.interaction.touching ? 2.8 : 2.1) : 0;
   particleState.interaction.strength = THREE.MathUtils.lerp(particleState.interaction.strength, targetStrength, 0.18);
   const strength = particleState.interaction.strength;
 
@@ -192,7 +196,7 @@ function updateParticleField(delta, elapsed) {
       if (distSq < radiusSq) {
         const dist = Math.sqrt(distSq) + 0.001;
         const falloff = (1 - dist / radius) * strength;
-        const repel = falloff * 0.12 * step;
+        const repel = falloff * 0.23 * step;
 
         positions[base] += (dx / dist) * repel;
         positions[base + 1] += (dy / dist) * repel * 0.9;
@@ -235,17 +239,18 @@ window.addEventListener("mousemove", (event) => {
   capturePointerPosition(event.clientX, event.clientY);
 });
 
-window.addEventListener(
-  "touchmove",
-  (event) => {
-    if (!particleState.interaction.touching) return;
-    particleState.interaction.active = true;
-    if (!event.touches || !event.touches.length) return;
-    const t = event.touches[0];
-    capturePointerPosition(t.clientX, t.clientY);
-  },
-  { passive: true }
-);
+function handleGlobalTouch(event) {
+  particleState.interaction.touching = true;
+  particleState.interaction.active = true;
+  if (!event.touches || !event.touches.length) return;
+  const t = event.touches[0];
+  capturePointerPosition(t.clientX, t.clientY);
+}
+
+document.addEventListener("touchstart", handleGlobalTouch, { passive: true, capture: true });
+document.addEventListener("touchmove", handleGlobalTouch, { passive: true, capture: true });
+window.addEventListener("touchstart", handleGlobalTouch, { passive: true });
+window.addEventListener("touchmove", handleGlobalTouch, { passive: true });
 
 canvas.addEventListener("mouseenter", () => {
   particleState.interaction.active = true;
@@ -254,18 +259,6 @@ canvas.addEventListener("mouseenter", () => {
 canvas.addEventListener("mouseleave", () => {
   particleState.interaction.active = false;
 });
-
-canvas.addEventListener(
-  "touchstart",
-  (event) => {
-    particleState.interaction.touching = true;
-    particleState.interaction.active = true;
-    if (!event.touches || !event.touches.length) return;
-    const t = event.touches[0];
-    capturePointerPosition(t.clientX, t.clientY);
-  },
-  { passive: true }
-);
 
 window.addEventListener(
   "touchend",
@@ -291,6 +284,38 @@ document.addEventListener("click", (event) => {
     triggerHaptic(8);
   }
 });
+
+function setContactMenuOpen(isOpen) {
+  if (!contactDropdown || !contactActionToggle) return;
+  contactDropdown.classList.toggle("is-open", isOpen);
+  contactActionToggle.setAttribute("aria-expanded", String(isOpen));
+}
+
+if (contactDropdown && contactActionToggle) {
+  contactActionToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const isOpen = contactDropdown.classList.contains("is-open");
+    setContactMenuOpen(!isOpen);
+    triggerHaptic(8);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!contactDropdown.contains(event.target)) {
+      setContactMenuOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setContactMenuOpen(false);
+  });
+
+  const contactMenuLinks = [...contactDropdown.querySelectorAll(".contact-action-menu a")];
+  contactMenuLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      setContactMenuOpen(false);
+    });
+  });
+}
 
 controls.addEventListener("start", () => {
   isUserInteracting = true;
@@ -384,8 +409,24 @@ function transitionToStage(stage, duration = 980) {
   requestAnimationFrame(step);
 }
 
-function setActiveSection(index) {
+function setActiveSection(index, options = {}) {
+  const deferCardReveal = Boolean(options.deferCardReveal);
+  const revealDelay = deferCardReveal ? CARD_REVEAL_DELAY_MS : 0;
+
   sections.forEach((section, i) => section.classList.toggle("is-active", i === index));
+
+  if (revealDelay > 0) {
+    const token = ++cardRevealToken;
+    sections.forEach((section) => section.classList.remove("is-card-visible"));
+    setTimeout(() => {
+      if (token !== cardRevealToken) return;
+      sections.forEach((section, i) => section.classList.toggle("is-card-visible", i === index));
+    }, revealDelay);
+  } else {
+    cardRevealToken += 1;
+    sections.forEach((section, i) => section.classList.toggle("is-card-visible", i === index));
+  }
+
   navLinks.forEach((link) => {
     const href = link.getAttribute("href") || "";
     const targetId = href.startsWith("#") ? href.slice(1) : "";
@@ -413,7 +454,7 @@ function activateStage(index, immediate = false) {
   if (!stageStates[index] || currentStage === index) return;
 
   currentStage = index;
-  setActiveSection(index);
+  setActiveSection(index, { deferCardReveal: !immediate });
   triggerHaptic(10);
 
   const stage = stageStates[index];
