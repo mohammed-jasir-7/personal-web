@@ -381,6 +381,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0.75rem;
+  align-items: start;
 }
 
 .project-card {
@@ -388,6 +389,10 @@ body {
   border-radius: 10px;
   border: 1px solid rgba(86, 255, 219, 0.18);
   background: rgba(8, 16, 29, 0.72);
+}
+
+.project-card-featured {
+  grid-column: 1 / -1;
 }
 
 .project-card-clickable {
@@ -412,6 +417,30 @@ body {
 .project-card p {
   margin-top: 0.45rem;
   font-size: 0.96rem;
+}
+
+.project-feature-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  color: #cfe6ff;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  columns: 2;
+  column-gap: 1.35rem;
+}
+
+.project-feature-list li + li {
+  margin-top: 0.22rem;
+}
+
+.project-feature-list li {
+  break-inside: avoid;
+}
+
+@media (max-width: 900px) {
+  .project-feature-list {
+    columns: 1;
+  }
 }
 
 .project-links {
