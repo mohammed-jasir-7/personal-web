@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultraviolette EV App | 3D Experience</title>
+    <meta
+      name="description"
+      content="Interactive 3D walkthrough of Ultraviolette EV App modules with rotation-driven highlights."
+    />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="uv-app.css" />
+    <script type="module" src="uv-app.js"></script>
+  </head>
+  <body>
+    <div class="ambient-glow" aria-hidden="true"></div>
+
+    <header class="uv-header">
+      <a class="back-link" href="index.html#projects">Back to Projects</a>
+      <div>
+        <p class="eyebrow">Ultraviolette EV App</p>
+        <h1>Project Features</h1>
+      </div>
+    </header>
+
+    <main class="uv-layout">
+      <section class="viewer-panel">
+        <canvas id="uv-bike-canvas" aria-label="3D three-cylinder bike"></canvas>
+        <div id="hotspots-layer" class="hotspots-layer" aria-label="Bike feature callouts"></div>
+        <div class="viewer-overlay">
+          <p id="rotation-label" class="rotation-label">Active Module: Pilot Dashboard</p>
+          <p class="hint">Rotate the bike to reveal app modules</p>
+          <div class="store-labels" aria-label="App availability labels">
+            <a
+              class="store-chip store-link"
+              href="https://apps.apple.com/in/app/ultraviolette/id1669915269"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open on App Store"
+            >
+              <svg class="store-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.4l3.1 5.4h-2.4l-3.1-5.4H12z" />
+                <path d="M6.4 19.7l4.5-7.8h2.4l-4.5 7.8H6.4z" />
+                <path d="M14.8 19.7l-1.2-2.1h2.4l1.2 2.1h-2.4z" />
+                <path d="M4.8 16.3h14.4v2H4.8v-2z" />
+              </svg>
+              <span>App Store</span>
+            </a>
+            <a
+              class="store-chip store-link"
+              href="https://play.google.com/store/search?q=ultraviolette&c=apps"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open on Play Store"
+            >
+              <svg class="store-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 4l12 8L5 20V4z" />
+                <path d="M5 4l7 7-2 1-5-8z" />
+                <path d="M5 20l7-7-2-1-5 8z" />
+              </svg>
+              <span>Play Store</span>
+            </a>
+          </div>
+        </div>
+
+        <aside id="feature-sheet" class="feature-sheet" hidden>
+          <button id="feature-sheet-close" class="feature-sheet-close" type="button" aria-label="Close details">×</button>
+          <p class="feature-sheet-kicker">Selected Feature</p>
+          <h3 id="feature-sheet-title"></h3>
+          <p id="feature-sheet-description"></p>
+          <ul id="feature-sheet-points"></ul>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

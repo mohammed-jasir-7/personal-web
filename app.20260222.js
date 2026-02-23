@@ -9,6 +9,7 @@ const sections = [...document.querySelectorAll(".story-section")];
 const navLinks = [...document.querySelectorAll(".section-nav a")];
 const contactDropdown = document.getElementById("contact-dropdown");
 const contactActionToggle = document.getElementById("contact-action-toggle");
+const clickableProjectCards = [...document.querySelectorAll(".project-card-clickable[data-href]")];
 
 const stageLabels = [
   "",
@@ -313,6 +314,26 @@ if (contactDropdown && contactActionToggle) {
   contactMenuLinks.forEach((link) => {
     link.addEventListener("click", () => {
       setContactMenuOpen(false);
+    });
+  });
+}
+
+if (clickableProjectCards.length) {
+  clickableProjectCards.forEach((card) => {
+    const href = card.dataset.href;
+    if (!href) return;
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      triggerHaptic(8);
+      window.location.href = href;
+    });
+
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      triggerHaptic(8);
+      window.location.href = href;
     });
   });
 }
